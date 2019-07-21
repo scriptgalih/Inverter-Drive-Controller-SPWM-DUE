@@ -1,6 +1,7 @@
 void parsing() {
   if (Serial1.available()) {
-    if (Serial1.read() == '@') {
+    char cc = Serial1.read();
+    if (cc == '@') {
       ca = '@';
       for (int x = 0; x <= 80; x++) {
         string[x] = NULL;
@@ -32,26 +33,17 @@ void parsing() {
       }
       if (ubahData[0] == 1) {
         setFreq = ubahData[1];
-//        if (statIRAMS == 1) {
+        //        if (statIRAMS == 1) {
+        set_amp(setFreq);
 
-          if (setFreq >= 50) {
-            setAmp = 1;
-            Serial.println("satu");
-          } else if (setFreq <= 20) {
-            setAmp = 0.2;
-            Serial.println("dua");
-          } else {
-            setAmp = (0.0267 * setFreq) - 0.3333;
-            Serial.println("tiga");
-          }
-          TimerStart(TC0, 2, TC2_IRQn, setFreq * 360 / 2);
-//        }
+        TimerStart(TC0, 2, TC2_IRQn, setFreq * 360 / 2);
+        //        }
         Serial.println(setAmp);
       } else if (ubahData[0] == 2) {
         setCarrier = ubahData[1];
-//        if (statIRAMS == 1) {
-          TimerStart(TC1, 0, TC3_IRQn, setCarrier * 49 / 2);
-//        }
+        //        if (statIRAMS == 1) {
+        TimerStart(TC1, 0, TC3_IRQn, setCarrier * 49 / 2);
+        //        }
 
       } else if (ubahData[0] == 0) {
         if (ubahData[1] == 1) {
@@ -73,7 +65,26 @@ void parsing() {
       //      Serial.print("\nCEK SALEAE\t F:");Serial.print(setFreq);
       //      Serial.print("\t Carrier:");Serial.print(setCarrier);
       //      Serial.print("\t Amplitudo:");Serial.print(setAmp);
+    } else if (cc == '+' || cc == '-') {
+      if (cc == '+')
+        setFreq++;
+      else
+        setFreq--;
+      TimerStart(TC0, 2, TC2_IRQn, setFreq * 360 / 2);
+      set_amp(setFreq);
     }
+  }
+}
+void set_amp(int f_sin) {
+  if (f_sin >= 50) {
+    setAmp = 1;
+    //    Serial.println("satu");
+  } else if (f_sin <= 20) {
+    setAmp = 0.2;
+    //    Serial.println("dua");
+  } else {
+    setAmp = (0.0267 * f_sin) - 0.3333;
+    //    Serial.println("tiga");
   }
 }
 
